@@ -21,8 +21,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url 'http://android.aldebaran.com/sdk/maven'
-            allowInsecureProtocol = true
+            url = uri("https://qisdk.softbankrobotics.com/sdk-beta/maven")
         }
     }
 }

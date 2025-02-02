@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.szkkr.pepperai"
-        minSdk 26
+        minSdk 23
         targetSdk 35
         versionCode 1
         versionName "1.0"
@@ -23,8 +23,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     packagingOptions {
@@ -47,8 +47,12 @@ dependencies {
     androidTestImplementation libs.espresso.core
 
     implementation 'com.aldebaran:qisdk:1.7.5'
+    implementation 'com.aldebaran:qisdk-design:1.7.5'
 
-    implementation 'com.azure:azure-ai-inference:1.0.0-beta.2'
+    //implementation 'com.azure:azure-ai-inference:1.0.0-beta.2'
+
+    implementation 'dev.langchain4j:langchain4j-open-ai:1.0.0-alpha1'
+    implementation 'dev.langchain4j:langchain4j:1.0.0-alpha1'
 
 }
 
