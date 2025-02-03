@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity/*RobotController*/
 class LangChTest
 {
     private static Assistant assistant;
+
     static {
         ChatLanguageModel model = OpenAiChatModel.builder()
                 .baseUrl("https://api.groq.com/openai/v1")
