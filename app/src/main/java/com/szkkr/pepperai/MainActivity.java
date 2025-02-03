@@ -164,6 +164,8 @@ class LangChTest
 
 class DataRetriever
 {
+    //ONLY FOR TEST PURPOSE
+    //THIS CLASS SHOULD REPRESENT THE SQL DATA RETRIEVER
     @Tool("Visszaadja az órarend szerinti jelenegi tanórát és a terem nevét vesszővel elválaszva a megadott névből" +
             "Ha nem talál ilyet a függvény, akkor -1 et ad eredményül: Ez esetben azt kell mondanod hogy nincs ilyen név" +
             "Ha viszont nem adott meg semmit a felhasználó akkor a függvény 0-t ad eredményül: Ez esetben kérd, " +
