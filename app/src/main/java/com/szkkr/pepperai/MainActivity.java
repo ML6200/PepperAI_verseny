@@ -1,5 +1,7 @@
 package com.szkkr.pepperai;
 
+import static dev.langchain4j.data.message.UserMessage.userMessage;
+
 import android.app.Activity;
 import android.media.AudioAttributes;
 import android.os.Bundle;
@@ -19,9 +21,13 @@ import com.szkkr.pepperai.backend.RobotController;
 import java.util.Locale;
 
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiTokenizer;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
@@ -76,21 +82,26 @@ public class MainActivity extends AppCompatActivity/*RobotController*/
 
 class LangChTest
 {
-    public static String chat(String inp)
-    {
+    private static Assistant assistant;
+    static {
         ChatLanguageModel model = OpenAiChatModel.builder()
                 .baseUrl("https://api.groq.com/openai/v1")
                 .apiKey("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")
-                .modelName(GroqModels.DEEPSEEK_R1_DISTILL_LLAMA_70B)
+                .modelName(GroqModels.LLAMA3_3_70B_VERSATILE)
                 .parallelToolCalls(true)
                 .build();
 
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+       assistant = AiServices.builder(Assistant.class)
                 .chatLanguageModel(model)
-                .tools(new Calculator(), new DataRetriever())
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(10))
+                .tools(new Calculator(), new DataRetriever())
                 .build();
+
+    }
+    public static String chat(String inp)
+    {
+
 
         return assistant.chat(inp);
     }
@@ -111,7 +122,7 @@ class LangChTest
     static class Calculator
     {
 
-        @Tool("Kiszámítja a karakterlánc hosszát")
+        @Tool(name="Kiszámítja a karakterlánc hosszát", value="")
         int stringLength(String s)
         {
             return s.length();
