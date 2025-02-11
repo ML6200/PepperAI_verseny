@@ -108,7 +108,6 @@ public class MainActivity extends Controller implements ExecuteEndedListener
                 String valasz = response.getContent();
                 exec(valasz, this);
             }).start();
-
         }
     }
 
