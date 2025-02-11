@@ -7,12 +7,14 @@ public enum GroqModels
 
     private final String modelName;
 
-    GroqModels(String modelName) {
+    GroqModels(String modelName)
+    {
         this.modelName = modelName;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return modelName;
     }
 }

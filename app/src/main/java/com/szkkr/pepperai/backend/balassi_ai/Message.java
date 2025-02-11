@@ -1,27 +1,33 @@
 package com.szkkr.pepperai.backend.balassi_ai;
 
-public class Message {
+public class Message
+{
     private final String role;
     private final String content;
 
-    public Message(String role, String content) {
+    public Message(String role, String content)
+    {
         this.role = role;
         this.content = content;
     }
 
-    public String getRole() {
+    public String getRole()
+    {
         return role;
     }
 
-    public String getContent() {
+    public String getContent()
+    {
         return content;
     }
 
-    public String toJson() {
+    public String toJson()
+    {
         return "{\"role\":\"" + escapeJson(role) + "\",\"content\":\"" + escapeJson(content) + "\"}";
     }
 
-    private String escapeJson(String text) {
+    private String escapeJson(String text)
+    {
         return text.replace("\"", "\\\"").replace("\n", "\\n");
     }
 }

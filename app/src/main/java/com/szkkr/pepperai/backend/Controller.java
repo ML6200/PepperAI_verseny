@@ -5,6 +5,7 @@ import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
 import com.aldebaran.qi.sdk.builder.SayBuilder;
 import com.aldebaran.qi.sdk.design.activity.RobotActivity;
 import com.aldebaran.qi.sdk.object.conversation.Say;
+import com.aldebaran.qi.sdk.object.conversation.SpeechEngine;
 import com.aldebaran.qi.sdk.object.human.Human;
 import com.aldebaran.qi.sdk.object.humanawareness.HumanAwareness;
 
@@ -13,15 +14,13 @@ import java.util.List;
 public class Controller extends RobotActivity implements RobotLifecycleCallbacks
 {
     private QiContext qiContext;
-    private HumanAwarenessController humanAwarenessController;
+
 
 
     @Override
     public void onRobotFocusGained(QiContext qiContext)
     {
         this.qiContext = qiContext;
-        this.humanAwarenessController = new HumanAwarenessController();
-
     }
 
     @Override
@@ -38,13 +37,21 @@ public class Controller extends RobotActivity implements RobotLifecycleCallbacks
 
     //-------------------------------FUNCTIONS--------------------------------------------
 
-    public void exec(String text)
-    {
+    public void exec(String text, ExecuteEndedListener listener) {
         Say say = SayBuilder.with(qiContext).withText(text).build();
-        say.run();
+        // Execute asynchronously so that the main thread isn’t blocked.
+        say.async().run().andThenConsume(future -> {
+
+            if (listener != null) {
+                listener.onExecuteEnded();
+            }
+        });
     }
 
-    class HumanAwarenessController
+
+
+    /*
+    public class HumanAwarenessController
     {
 
         private HumanAwareness humanAwareness;
@@ -99,5 +106,21 @@ public class Controller extends RobotActivity implements RobotLifecycleCallbacks
                 System.err.println("Error: HumanAwareness is null. Check if the service is available.");
             }
         }
+
+        public void addOnHumansAroundChangedListener(HumanAwareness.OnHumansAroundChangedListener listener)
+        {
+            this.humanAwareness.addOnHumansAroundChangedListener(listener);
+        }
+
+        public void addOnEngagedHumanAgeChangedListener()
+        {
+
+        }
     }
+
+    public interface ExecuteEndedListener
+    {
+        void onExecuteEnded();
+    }
+     */
 }

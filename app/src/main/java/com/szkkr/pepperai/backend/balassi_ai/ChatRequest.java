@@ -1,18 +1,52 @@
 package com.szkkr.pepperai.backend.balassi_ai;
 
-import java.util.List;
 import com.google.gson.Gson;
 
-public class ChatRequest {
-    private final String model;
-    private final List<Message> messages;
+import java.util.ArrayList;
+import java.util.List;
 
-    public ChatRequest(String model, List<Message> messages) {
+public class ChatRequest
+{
+    private String model;
+    private List<Message> messages;
+
+    public ChatRequest(String model, List<Message> messages)
+    {
         this.model = model;
         this.messages = messages;
     }
 
-    public String toJson() {
+    public ChatRequest()
+    {
+        messages = new ArrayList<>();
+    }
+
+    public void addMessage(Message message)
+    {
+        messages.add(message);
+    }
+
+    public void addUserMessage(String message) {
+
+        addMessage(new Message("user", message));
+    }
+
+    public void addSystemMessage(String message) {
+        addMessage(new Message("system", message));
+    }
+
+    public void setModel(String model)
+    {
+        this.model = model;
+    }
+
+    public void setMemory(ChatMemory memory)
+    {
+        this.messages = memory.getMessages();
+    }
+
+    public String toJson()
+    {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
