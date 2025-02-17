@@ -35,7 +35,7 @@ public class MainActivity extends Controller implements ExecuteEndedListener
     private Button gomb;
 
 
-    private final String apiKey = "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"; // Replace with actual key
+    private final String apiKey = "API_KEY"; // Replace with actual key
     private final String systemMessage = "Te a Balassagyarmati Balassi Bálint Gimnázium mesterséges intelligencia alapú robotja vagy. \n" +
             "A te neved Pepi.\n" +
             "A feladatod, hogy segíts a diákoknak a tanulásban és egyéb iskolához kötődő dolgokban.\n" +
