@@ -1,4 +1,4 @@
-package com.szkkr.pepperai.backend.balassi_ai;
+package com.szkkr.pepperai.backend.depricated;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

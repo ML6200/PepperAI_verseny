@@ -1,4 +1,4 @@
-package com.szkkr.pepperai.backend.balassi_ai;
+package com.szkkr.pepperai.backend.depricated;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

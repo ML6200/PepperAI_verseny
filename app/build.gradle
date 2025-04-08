@@ -28,6 +28,15 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    // Exclude problematic example files from compilation
+    sourceSets {
+        main {
+            java {
+                exclude '**/examples/**'
+            }
+        }
+    }
+
     useLibrary 'org.apache.http.legacy'
 }
 
@@ -52,6 +61,15 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.8'
     //implementation 'com.azure:azure-ai-inference:1.0.0-beta.2'
 
+    // Jackson dependencies for JSON processing
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    
+    // SLF4J dependencies for logging
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
+    
     //implementation 'dev.langchain4j:langchain4j-open-ai:1.0.0-alpha1'
     //implementation 'dev.langchain4j:langchain4j:1.0.0-alpha1'
 

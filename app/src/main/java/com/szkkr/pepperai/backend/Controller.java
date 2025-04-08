@@ -14,6 +14,7 @@ import java.util.List;
 public class Controller extends RobotActivity implements RobotLifecycleCallbacks
 {
     private QiContext qiContext;
+    private boolean hasFocus = false;
 
 
 
@@ -21,18 +22,20 @@ public class Controller extends RobotActivity implements RobotLifecycleCallbacks
     public void onRobotFocusGained(QiContext qiContext)
     {
         this.qiContext = qiContext;
+        this.hasFocus = true;
     }
 
     @Override
     public void onRobotFocusLost()
     {
-
+        this.hasFocus = false;
+        this.qiContext = null;
     }
 
     @Override
     public void onRobotFocusRefused(String reason)
     {
-
+        this.hasFocus = false;
     }
 
     //-------------------------------FUNCTIONS--------------------------------------------
@@ -47,80 +50,4 @@ public class Controller extends RobotActivity implements RobotLifecycleCallbacks
             }
         });
     }
-
-
-
-    /*
-    public class HumanAwarenessController
-    {
-
-        private HumanAwareness humanAwareness;
-        private List<Human> humansAround;
-        private Human engagedHuman;
-
-        public HumanAwarenessController()
-        {
-            initializeHumanAwareness();
-        }
-
-        private void initializeHumanAwareness()
-        {
-            humanAwareness = qiContext.getHumanAwareness();
-            if (humanAwareness != null)
-            {
-                humansAround = humanAwareness.getHumansAround();
-                engagedHuman = humanAwareness.getEngagedHuman();
-            } else
-            {
-                // Handle the case where humanAwareness is null
-                // For example, log an error or throw an exception
-                System.err.println("Error: HumanAwareness is null. Check if the service is available.");
-            }
-        }
-
-        public HumanAwareness getHumanAwareness()
-        {
-            return humanAwareness;
-        }
-
-        public List<Human> getHumansAround()
-        {
-            return humansAround;
-        }
-
-        public Human getEngagedHuman()
-        {
-            return engagedHuman;
-        }
-
-        public void updateHumanAwareness()
-        {
-            if (humanAwareness != null)
-            {
-                humansAround = humanAwareness.getHumansAround();
-                engagedHuman = humanAwareness.getEngagedHuman();
-            } else
-            {
-                // Handle the case where humanAwareness is null
-                // For example, log an error or throw an exception
-                System.err.println("Error: HumanAwareness is null. Check if the service is available.");
-            }
-        }
-
-        public void addOnHumansAroundChangedListener(HumanAwareness.OnHumansAroundChangedListener listener)
-        {
-            this.humanAwareness.addOnHumansAroundChangedListener(listener);
-        }
-
-        public void addOnEngagedHumanAgeChangedListener()
-        {
-
-        }
-    }
-
-    public interface ExecuteEndedListener
-    {
-        void onExecuteEnded();
-    }
-     */
 }
