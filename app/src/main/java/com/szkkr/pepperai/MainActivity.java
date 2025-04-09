@@ -42,12 +42,13 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
             "(Mogyorósi Attlila: Az iskola igazgatója. Ő biológiát tanít.)" +
             "\n";
     //A feladatod, hogy segíts a diákoknak a tanulásban és egyéb iskolához kötődő dolgokban.
-
+    private final String SZOVEG = "Sziasztok ocskosok";
+    /*
     private final String SZOVEG = "Kedves Versenyzők!\n" +
             "Nagyszerű nap végén vagyunk túl, remélem ti is jól éreztétek magatokat. A feladatok megálmodói, a verseny szervezői nevében mondok köszönetet azért, hogy mindent beleadtatok a mai vetélkedőbe, és hogy mindenki sportszerű volt. Nagyon remélem, hogy jó élményekkel tértek haza és erre a napra, az első Tanker Kupára, szívesen fogtok emlékezni. Gratulálunk mindenkinek, aki a mai napon részt vett a játékokban. Fogadjátok szeretettel a mai nap emlékére készült emléklapot.\n" +
             "\n" +
             "Most pedig kihirdetjük a verseny eredményét. A verseny főszervezője, a Balassagyarmati Tankerületi Központ igazgatója, Nagyné Barna Orsolya fogja szólítani azokat a csapatokat, akik a legtöbb pontot szerezték a mai napon.";
-
+*/
     private final GroqApiService apiService = new GroqApiService(apiKey);
     private SpeechManager speechManager = new SpeechManager();
     private volatile ChatMemory memory = new ChatMemory();
@@ -106,8 +107,6 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
             String result = results.get(0);
 
             // Check if the input contains any keywords - simple direct approach
-
-            String keywordResponse = result.contains("szöveg") ? "Ez egy szöveg." : null;
             
             processWithLLM(result);
         }
@@ -135,7 +134,18 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
                 // Execute the speech on the UI thread
                 runOnUiThread(() -> {
                     if (userInput.contains("zárd le a versenyt"))
-                        execSay(SZOVEG, MainActivity.this);
+                        execSay(SZOVEG, new ExecuteEndedListener() {
+                            @Override
+                            public void onExecuteEnded()
+                            {
+                                animateRobot(ROBOT_HAND_HOLD, new ExecuteEndedListener() {
+                                    @Override
+                                    public void onExecuteEnded() {
+                                        animateRobot(ROBOT_HAND_HOLD, null);
+                                    }
+                                });
+                            }
+                        });
                     else
                         execSay(valasz, MainActivity.this);
                 });
@@ -148,6 +158,8 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
             }
         }).start();
     }
+
+
 
     @Override
     public void onExecuteEnded()

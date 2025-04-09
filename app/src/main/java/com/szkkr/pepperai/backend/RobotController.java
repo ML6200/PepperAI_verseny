@@ -5,135 +5,27 @@ import androidx.annotation.NonNull;
 import com.aldebaran.qi.Future;
 import com.aldebaran.qi.sdk.QiContext;
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
+import com.aldebaran.qi.sdk.builder.AnimateBuilder;
+import com.aldebaran.qi.sdk.builder.AnimationBuilder;
 import com.aldebaran.qi.sdk.builder.SayBuilder;
 import com.aldebaran.qi.sdk.design.activity.RobotActivity;
+import com.aldebaran.qi.sdk.object.actuation.Animate;
+import com.aldebaran.qi.sdk.object.actuation.Animation;
+import com.aldebaran.qi.sdk.object.conversation.QiChatbot;
 import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.aldebaran.qi.sdk.object.touch.TouchSensor;
+import com.aldebaran.qi.sdk.util.FutureUtils;
+import com.szkkr.pepperai.R;
 
 import java.util.concurrent.ExecutionException;
 
-public class RobotController extends RobotActivity implements RobotLifecycleCallbacks
+public class RobotController
+        extends RobotActivity
+        implements RobotLifecycleCallbacks
 {
+    public Animation ROBOT_HAND_HOLD;
     private QiContext qiContext;
-    private SayManager sayManager = new SayManager();
-
-    private TouchSensor headTouchSensor;
-
-    public TouchSensor getHeadTouchSensor()
-    {
-        return headTouchSensor;
-    }
-
-    public Future<Say> getSayFuture() {
-        return sayFuture;
-    }
-
-    private volatile Future<Say> sayFuture;
-
-    @Override
-    public void onRobotFocusGained(QiContext qiContext)
-    {
-        this.qiContext = qiContext;
-        this.headTouchSensor = qiContext.getTouch().getSensor("Head/Touch");
-
-        headTouchSensor.addOnStateChangedListener(state ->
-        {
-                sayFuture.cancel(true);
-                say("Ez jól esik. Szeretem, ha simogatják a fejem!");
-
-        });
-    }
-
-    @Override
-    public void onRobotFocusLost()
-    {
-        //NO NEED TO IMPLEMENT
-    }
-
-    @Override
-    public void onRobotFocusRefused(String reason)
-    {
-        //NO NEED TO IMPLEMENT
-    }
-
-    //-------------------------------FUNCTIONS--------------------------------------------
-
-
-    public void execSay(String text, ExecuteEndedListener listener)
-    {
-        if (qiContext == null) {
-            System.err.println("QiContext is null. Cannot execute speech.");
-            if (listener != null) {
-                listener.onExecuteEnded();
-            }
-            return;
-        }
-
-        // Store the future reference so it can be cancelled if needed
-        sayFuture = say(text, listener);
-    }
-
-    @NonNull
-    public Future<Say> say(String text) {
-        return say(text, null);
-    }
-
-    @NonNull
-    public Future<Say> say(String text, ExecuteEndedListener listener) {
-        Future<Say> sayFuture = SayBuilder.with(qiContext).withText(text).buildAsync();
-        
-        // Process the future result correctly
-        sayFuture.thenConsume(future -> {
-            try {
-                if (future.isSuccess()) {
-                    // Get the actual Say object from the future
-                    Say say = future.getValue();
-                    
-                    // Run the say action
-                    Future<Void> runFuture = say.async().run();
-                    
-                    // When the say action completes, notify the listener
-                    runFuture.thenConsume(runResult -> {
-                        if (listener != null) {
-                            listener.onExecuteEnded();
-                        }
-                    });
-                } else {
-                    System.err.println("Failed to build Say: " + future.getErrorMessage());
-                    if (listener != null) {
-                        listener.onExecuteEnded();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                if (listener != null) {
-                    listener.onExecuteEnded();
-                }
-            }
-        });
-        
-        return sayFuture;
-    }
-
-    @Deprecated
-    public <P> void execute(RobotOperation robotOperation, ExecuteEndedListener listener, P... params) {
-        // Cancel any existing operation first
-        if (sayManager.isExecutePending) {
-            sayManager.cancelCurrentOperation();
-        }
-
-        try {
-            Future future = robotOperation.callMethod(params);
-            future.andThenConsume(f -> {
-                if (listener != null) {
-                    listener.onExecuteEnded();
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    private final SayManager sayManager = new SayManager();
     @Deprecated
     public final RobotOperation<String> SAY_ROBOT_OPERATION = new RobotOperation<String>()
     {
@@ -155,6 +47,152 @@ public class RobotController extends RobotActivity implements RobotLifecycleCall
             return sayManager.executeSay(params[0]);
         }
     };
+    private TouchSensor headTouchSensor;
+    private volatile Future<Say> sayFuture;
+    private Animate animate;
+
+    public TouchSensor getHeadTouchSensor() {
+        return headTouchSensor;
+    }
+
+    public Future<Say> getSayFuture() {
+        return sayFuture;
+    }
+
+    @Override
+    public void onRobotFocusGained(QiContext qiContext)
+    {
+        this.qiContext = qiContext;
+        this.headTouchSensor = qiContext.getTouch().getSensor("Head/Touch");
+
+        this.ROBOT_HAND_HOLD = AnimationBuilder.with(qiContext).withResources(R.raw.robot_hand_hold).build();
+
+        headTouchSensor.addOnStateChangedListener(state ->
+        {
+            sayFuture.cancel(true);
+            say("Ez jól esik. Szeretem, ha simogatják a fejem!");
+
+        });
+    }
+
+    //-------------------------------FUNCTIONS--------------------------------------------
+
+    @Override
+    public void onRobotFocusLost()
+    {
+        //NO NEED TO IMPLEMENT
+    }
+
+    @Override
+    public void onRobotFocusRefused(String reason)
+    {
+        //NO NEED TO IMPLEMENT
+    }
+
+    public void execSay(String text, ExecuteEndedListener listener) {
+        if (qiContext == null) {
+            System.err.println("QiContext is null. Cannot execute speech.");
+            if (listener != null) {
+                listener.onExecuteEnded();
+            }
+            return;
+        }
+
+        // Store the future reference so it can be cancelled if needed
+        sayFuture = say(text, listener);
+    }
+
+
+    //#####################################HANDLING_ANIMATION####################################
+
+    @NonNull
+    public Future<Say> say(String text) {
+        return say(text, null);
+    }
+
+    @NonNull
+    public Future<Say> say(String text, ExecuteEndedListener listener)
+    {
+        Future<Say> sayFuture = SayBuilder.with(qiContext).withText(text).buildAsync();
+
+        // Process the future result correctly
+        sayFuture.thenConsume(future -> {
+            try {
+                if (future.isSuccess()) {
+                    // Get the actual Say object from the future
+                    Say say = future.getValue();
+
+                    // Run the say action
+                    Future<Void> runFuture = say.async().run();
+
+                    // When the say action completes, notify the listener
+                    runFuture.thenConsume(runResult -> {
+                        if (listener != null) {
+                            listener.onExecuteEnded();
+                        }
+                    });
+                } else {
+                    System.err.println("Failed to build Say: " + future.getErrorMessage());
+                    if (listener != null) {
+                        listener.onExecuteEnded();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (listener != null) {
+                    listener.onExecuteEnded();
+                }
+            }
+        });
+
+        return sayFuture;
+    }
+
+    public void animateRobot(Animation animation, ExecuteEndedListener listener )
+    {
+        animate = AnimateBuilder.with(qiContext).withAnimation(animation).build();
+
+        animate.async().run();
+        listener.onExecuteEnded();
+    }
+
+    private void onAnimationFinished(Void v) {
+        if (!isStopped)
+        {
+            animate.async().run();
+        }
+    }
+
+    private boolean isStopped = true;
+
+
+    public void stopAnim()
+    {
+        isStopped = true;
+        if(animate!=null)
+        {
+            animate.removeAllOnLabelReachedListeners();
+        }
+    }
+    //#####################################DEPRICATED_DEPENDENCIES########################################################
+    @Deprecated
+    public <P> void execute(RobotOperation robotOperation, ExecuteEndedListener listener, P... params) {
+        // Cancel any existing operation first
+        if (sayManager.isExecutePending) {
+            sayManager.cancelCurrentOperation();
+        }
+
+        try {
+            Future future = robotOperation.callMethod(params);
+            future.andThenConsume(f -> {
+                if (listener != null) {
+                    listener.onExecuteEnded();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Deprecated
     class SayManager {
@@ -186,10 +224,5 @@ public class RobotController extends RobotActivity implements RobotLifecycleCall
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    interface SayListener
-    {
-
     }
 }
