@@ -12,6 +12,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.aldebaran.qi.Consumer;
+import com.aldebaran.qi.Future;
+import com.aldebaran.qi.sdk.Qi;
 import com.aldebaran.qi.sdk.QiSDK;
 import com.szkkr.pepperai.backend.ExecuteEndedListener;
 import com.szkkr.pepperai.backend.RobotController;
@@ -31,7 +34,7 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
     private static final String TAG = "MainActivity";
     private Button gomb;
 
-    private final String apiKey = "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"; // Replace with actual key
+    private final String apiKey = "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"; // Not secure!!!
     private final String systemMessage = "Te a Balassagyarmati Balassi Bálint Gimnázium mesterséges intelligencia alapú robotja vagy. \n" +
             "A te neved Pepi.\n" +
             "\n" +
@@ -42,16 +45,18 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
             "(Mogyorósi Attlila: Az iskola igazgatója. Ő biológiát tanít.)" +
             "\n";
     //A feladatod, hogy segíts a diákoknak a tanulásban és egyéb iskolához kötődő dolgokban.
-    private final String SZOVEG = "Sziasztok ocskosok";
-    /*
+    private final String SZOVEG2 = "Sziasztok öcskösök";
+
     private final String SZOVEG = "Kedves Versenyzők!\n" +
             "Nagyszerű nap végén vagyunk túl, remélem ti is jól éreztétek magatokat. A feladatok megálmodói, a verseny szervezői nevében mondok köszönetet azért, hogy mindent beleadtatok a mai vetélkedőbe, és hogy mindenki sportszerű volt. Nagyon remélem, hogy jó élményekkel tértek haza és erre a napra, az első Tanker Kupára, szívesen fogtok emlékezni. Gratulálunk mindenkinek, aki a mai napon részt vett a játékokban. Fogadjátok szeretettel a mai nap emlékére készült emléklapot.\n" +
             "\n" +
             "Most pedig kihirdetjük a verseny eredményét. A verseny főszervezője, a Balassagyarmati Tankerületi Központ igazgatója, Nagyné Barna Orsolya fogja szólítani azokat a csapatokat, akik a legtöbb pontot szerezték a mai napon.";
-*/
     private final GroqApiService apiService = new GroqApiService(apiKey);
     private SpeechManager speechManager = new SpeechManager();
     private volatile ChatMemory memory = new ChatMemory();
+
+
+    private volatile boolean isHolding = false;
     
     // Direct keyword-response map for simplicity
     private Map<String, String> keywordResponses = new HashMap<>();
@@ -107,7 +112,6 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
             String result = results.get(0);
 
             // Check if the input contains any keywords - simple direct approach
-            
             processWithLLM(result);
         }
     }
@@ -121,7 +125,8 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
         memory.addUserMessage(userInput);
 
         // Execute the API call in a background thread to avoid NetworkOnMainThreadException
-        new Thread(() -> {
+        new Thread(() ->
+        {
             try {
                 ChatRequest request = new ChatRequest();
                 request.setModel(GroqModels.LLAMA3_3_70B_VERSATILE.toString());
@@ -130,22 +135,15 @@ public class MainActivity extends RobotController implements ExecuteEndedListene
                 // API call - This happens in the background thread
                 final ChatResponse response = apiService.sendMessage(request);
                 final String valasz = response.getContent();
-                
+
                 // Execute the speech on the UI thread
-                runOnUiThread(() -> {
-                    if (userInput.contains("zárd le a versenyt"))
-                        execSay(SZOVEG, new ExecuteEndedListener() {
-                            @Override
-                            public void onExecuteEnded()
-                            {
-                                animateRobot(ROBOT_HAND_HOLD, new ExecuteEndedListener() {
-                                    @Override
-                                    public void onExecuteEnded() {
-                                        animateRobot(ROBOT_HAND_HOLD, null);
-                                    }
-                                });
-                            }
-                        });
+                runOnUiThread(() ->
+                {
+
+                     if (!isHolding && userInput.contains("zárd le a versenyt"))
+                    {
+                        execSay(SZOVEG , () -> animateRobot(ROBOT_HAND_HOLD, this::holdBodyPose));
+                    }
                     else
                         execSay(valasz, MainActivity.this);
                 });
